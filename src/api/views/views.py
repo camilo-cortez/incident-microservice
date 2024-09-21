@@ -1,4 +1,6 @@
 import hashlib
+from random import randrange
+import time
 from flask import request
 from flask import jsonify
 from flask_restful import Resource
@@ -71,6 +73,7 @@ class ViewLogin(Resource):
             "token": token_access,
         }, 200
 
+#@jwt_required
 class ViewIncident(Resource):
     def get(self, id_incident):
         incident = Incident.query.get_or_404(id_incident)
@@ -82,7 +85,8 @@ class ViewIncident(Resource):
         description = request.json["description"]
         channel = request.json["channel"]
 
-        current_user_id = get_jwt_identity() 
+        current_user_id = randrange(10) #get_jwt_identity() 
+        time.sleep(1) #mock processing time
 
         new_incident = Incident(
             type = incident_type,
