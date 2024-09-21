@@ -11,7 +11,7 @@ class User(db.Model):
     user = db.Column(db.String(128))
     email = db.Column(db.String(150))
     password = db.Column(db.String(150))
-    tasks = db.relationship('Task', backref='user', lazy=True)
+    incidents = db.relationship('Incident', backref='user', lazy=True)
 
 class Incident(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -19,6 +19,7 @@ class Incident(db.Model):
     status = db.Column(db.String(25))
     description = db.Column(db.String(150))
     channel = db.Column(db.String(25))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
 class IncidentSchema(SQLAlchemyAutoSchema):
     class Meta:

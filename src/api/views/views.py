@@ -3,7 +3,7 @@ from flask import request
 from flask import jsonify
 from flask_restful import Resource
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-from models import (
+from src.api.models import (
     db,
     Incident,
     IncidentSchema,
@@ -82,11 +82,14 @@ class ViewIncident(Resource):
         description = request.json["description"]
         channel = request.json["channel"]
 
+        current_user_id = get_jwt_identity() 
+
         new_incident = Incident(
             type = incident_type,
             status = status,
             description = description,
-            channel = channel
+            channel = channel,
+            user_id = current_user_id
         )
         db.session.add(new_incident)
         db.session.commit()
