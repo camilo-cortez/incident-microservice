@@ -97,6 +97,7 @@ class ViewIncident(Resource):
         )
         db.session.add(new_incident)
         db.session.commit()
+        return new_incident
     
     def delete(self, id_incident):
         try:
