@@ -1,6 +1,7 @@
 import os
 import boto3
 import logging
+import requests
 
 logging.basicConfig(level=os.environ.get("LOG_LEVEL", "INFO"))
 logger = logging.getLogger(__name__)
@@ -10,7 +11,8 @@ def ensure_envvars():
     """Ensure that these environment variables are provided at runtime"""
     required_envvars = [
         "AWS_REGION",
-        "SQSCONSUMER_QUEUENAME"
+        "SQSCONSUMER_QUEUENAME",
+        "URL_BASE_INCIDENTS"
     ]
 
     missing_envvars = []
@@ -24,10 +26,30 @@ def ensure_envvars():
         raise AssertionError(message)
 
 
-def process_message(message_body):
+def process_message(message_body, message_attributes):
     logger.info(f"Processing message: {message_body}")
-    # do what you want with the message here
-    pass
+    response : object
+    url: str
+    if message_attributes is not None:
+        event : str = message_attributes.get('event').get('StringValue')
+        url_origin = message_attributes.get('url_origin').get('StringValue')
+        method : str = message_attributes.get('method').get('StringValue')
+    # Call incident api
+    if event.lower() == 'incidents':
+        url = os.environ["URL_BASE_INCIDENTS"]
+    payload = {message_body}
+
+    if method.lower() == 'post':
+        response = requests.post(url, payload)
+    elif method.lower() == 'delete':
+        response = requests.delete(url, payload)
+    elif method.lower() == 'put':
+        response = requests.put(url, payload)
+    else:
+        response = requests.get(url, payload)
+
+    print(f"Response: {response.text}, status: {response.status_code}")
+    return response
 
 
 def main():
@@ -46,11 +68,12 @@ def main():
     while True:
         messages = queue.receive_messages(
             MaxNumberOfMessages=1,
-            WaitTimeSeconds=1
+            WaitTimeSeconds=1,
+            MessageAttributeNames=['All']
         )
         for message in messages:
             try:
-                process_message(message.body)
+                process_message(message.body, message.message_attributes)
             except Exception as e:
                 print(f"Exception while processing message: {repr(e)}")
                 continue
