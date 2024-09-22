@@ -113,3 +113,8 @@ class ViewIncidents(Resource):
     def get(self):
         incidents = Incident.query.all()
         return incident_schema.dump(incidents, many=True)
+
+
+class ViewPing(Resource):
+    def get(self):
+        return "pong", 200

@@ -7,7 +7,8 @@ from src.api.views.views import ViewIncidents
 from src.api.views import (
     ViewRegister,
     ViewLogin,
-    ViewIncident
+    ViewIncident,
+    ViewPing
 )
 
 app = create_app('incidents-api')
@@ -23,6 +24,7 @@ api.add_resource(ViewRegister, "/user-register")
 api.add_resource(ViewLogin, "/login")
 api.add_resource(ViewIncident, "/incident/<int:id_incident>")
 api.add_resource(ViewIncidents, "/incidents")
+api.add_resource(ViewPing, "/ping")
 jwt = JWTManager(app)
 
 
