@@ -6,6 +6,6 @@ COPY ./src /app
 
 RUN pip install -r requirements.txt
 
-ENV SQSCONSUMER_QUEUENAME=example-helloworld-requests
+EXPOSE 5000
 
 ENTRYPOINT python sqs_consumer.py

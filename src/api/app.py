@@ -15,6 +15,7 @@ app = create_app('incidents-api')
 
 app_context = app.app_context()
 app_context.push()
+db.drop_all()
 db.create_all()
 
 cors = CORS(app, resources={r"/*": {"origins": "*"}})

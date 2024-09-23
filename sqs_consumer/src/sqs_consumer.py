@@ -28,27 +28,39 @@ def ensure_envvars():
 
 def process_message(message_body, message_attributes):
     logger.info(f"Processing message: {message_body}")
-    response : object
-    url: str
-    if message_attributes is not None:
-        event : str = message_attributes.get('event').get('StringValue')
-        url_origin = message_attributes.get('url_origin').get('StringValue')
-        method : str = message_attributes.get('method').get('StringValue')
-    # Call incident api
-    if event.lower() == 'incidents':
-        url = os.environ["URL_BASE_INCIDENTS"]
-    payload = {message_body}
+    logger.info(f"Message attributes: {message_attributes}")
+    
+    response: object
+    url: str = None  # Initialize url with a default value
 
-    if method.lower() == 'post':
+    if message_attributes is not None:
+        event: str = message_attributes.get('event').get('StringValue').lower()
+        url_origin = message_attributes.get('url_origin').get('StringValue')
+        method: str = message_attributes.get('method').get('StringValue').lower()
+
+        # Call incident API
+        if event in ['incident', 'incidents']:
+            url = os.environ["URL_BASE_INCIDENTS"]
+        else:
+            logger.error(f"Unhandled event type: {event}")
+            return None
+
+    if not url:
+        logger.error("URL was not defined, skipping message")
+        return None
+
+    payload = message_body
+
+    if method == 'post':
         response = requests.post(url, payload)
-    elif method.lower() == 'delete':
+    elif method == 'delete':
         response = requests.delete(url, payload)
-    elif method.lower() == 'put':
+    elif method == 'put':
         response = requests.put(url, payload)
     else:
-        response = requests.get(url, payload)
+        response = requests.get(url, params=payload)
 
-    print(f"Response: {response.text}, status: {response.status_code}")
+    logger.info(f"Response: {response.text}, status: {response.status_code}")
     return response
 
 
@@ -62,7 +74,8 @@ def main():
 
     queue_name = os.environ["SQSCONSUMER_QUEUENAME"]
     logger.info(f"Subscribing to queue {queue_name}")
-    sqs = boto3.resource("sqs")
+
+    sqs = boto3.resource('sqs', region_name=os.environ.get('AWS_REGION'))
     queue = sqs.get_queue_by_name(QueueName=queue_name)
 
     while True:
@@ -75,7 +88,7 @@ def main():
             try:
                 process_message(message.body, message.message_attributes)
             except Exception as e:
-                print(f"Exception while processing message: {repr(e)}")
+                logger.error(f"Exception while processing message: {repr(e)}")
                 continue
 
             message.delete()

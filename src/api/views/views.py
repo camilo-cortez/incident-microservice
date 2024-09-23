@@ -79,25 +79,24 @@ class ViewIncident(Resource):
         incident = Incident.query.get_or_404(id_incident)
         return incident_schema.dump(Incident.query.get_or_404(incident.id))
     
-    def post(self):
+    def post(self, id_incident):
         incident_type = request.json["type"]
         status = request.json["status"]
         description = request.json["description"]
         channel = request.json["channel"]
 
-        current_user_id = randrange(10) #get_jwt_identity() 
+        # current_user_id = randrange(10) #get_jwt_identity() 
         time.sleep(1) #mock processing time
 
         new_incident = Incident(
-            type = incident_type,
+            incident_type = incident_type,
             status = status,
             description = description,
-            channel = channel,
-            user_id = current_user_id
+            channel = channel
         )
         db.session.add(new_incident)
         db.session.commit()
-        return new_incident
+        return incident_schema.dump(new_incident), 201
     
     def delete(self, id_incident):
         try:

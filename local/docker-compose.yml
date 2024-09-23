@@ -10,15 +10,15 @@ services:
       - my_app_network
     depends_on:
       - db
-    volumes:
-    - F:\Documents:/nfs/general 
 
   db:
     image: postgres:latest
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: miso4501
-      POSTGRES_DB: miso4501db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: postgres
+      DB_HOST: postgres
+      DB_PORT: 5432
     ports:
       - "5432:5432"
     volumes:
@@ -29,8 +29,8 @@ services:
   pgadmin:
     image: dpage/pgadmin4
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@uniandes.edu.co
-      PGADMIN_DEFAULT_PASSWORD: miso4501
+      PGADMIN_DEFAULT_EMAIL: postgres@uniandes.edu.co
+      PGADMIN_DEFAULT_PASSWORD: postgres
     ports:
       - "8080:80"
     depends_on:
